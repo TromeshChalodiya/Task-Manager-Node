@@ -85,8 +85,7 @@ router.get('/users/me', auth, async (req, res) => {
 //   }
 // });
 
-router.patch('/users/:id', async (req, res) => {
-  const _id = req.params.id;
+router.patch('/users/me', auth, async (req, res) => {
   const updates = Object.keys(req.body);
   const allowedUpdates = ['age', 'name', 'email', 'password'];
 
@@ -99,31 +98,22 @@ router.patch('/users/:id', async (req, res) => {
   }
 
   try {
-    const id = await User.findById(_id);
     updates.forEach(update => {
-      id[update] = req.body[update];
+      req.user[update] = req.body[update];
     });
 
-    await id.save();
-
-    if (!id) {
-      res.status(404).send();
-    }
-    res.send(id);
+    await req.user.save();
+    res.send(req.user);
   } catch (e) {
     res.status(400).send(e);
   }
 });
 
-//-->
-router.delete('/users/me', async (req, res) => {
-  const _id = req.params.id;
+//--> for deleting the perticular user
+router.delete('/users/me', auth, async (req, res) => {
   try {
-    const user = await User.findByIdAndDelete(_id);
-    if (!user) {
-      res.status(404).send({ error: 'User can not found' });
-    }
-    res.send(user);
+    await req.user.remove();
+    res.send(req.user);
   } catch (e) {
     res.status(400).send(e);
   }
