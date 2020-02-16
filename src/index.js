@@ -33,7 +33,7 @@ const port = process.env.PORT || 3000;
 //   }
 // });
 
-app.use(express.json());
+app.use(express.json()); //convert array/object data into pure JSON object
 
 app.use(userRouter);
 app.use(taskRouter);
@@ -53,3 +53,28 @@ const myFunction = async (req, res) => {
 };
 
 myFunction();
+
+const Task = require('./models/task-app');
+const User = require('./models/users');
+
+const main = async () => {
+  /*
+  const task = await Task.findById('5e3f0a6e62569d0b3cb5c51c');
+  await task.populate('owner').execPopulate();
+  console.log(task);
+  */
+
+  const user = await User.findById('5e3f627c77d0592e98844a84');
+  try {
+    if (!user) {
+      console.log('User is not there!');
+    } else {
+      await user.populate('tasks').execPopulate();
+    }
+  } catch (err) {
+    console.log('Something wrong');
+  }
+  //console.log(user.tasks);
+};
+
+main();
