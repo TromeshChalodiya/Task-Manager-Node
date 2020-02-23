@@ -8,30 +8,38 @@ const taskRouter = require('./router/tasks');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Without Middleware :- new request -> run route handler
-// With Middleware :- new request -> do something -> run route handler
+const multer = require('multer');
+const upload = multer({
+  dest: 'images',
+  limits: {
+    fileSize: 1000000
+  },
+  fileFilter(req, file, cb) {
+    if (!file.originalname.match(/\.(doc|docx)$/)) {
+      return cb(new Error('Please upload a Word document'));
+    }
 
-// Express Middleware
+    cb(undefined, true);
+    // cb(new Error('Please upload a PDF'))
+    // cb(undefined, true)
+    // cb(undefined, false)
+  }
+});
 
-// app.use((req, res, next) => {
-//   console.log(req.method, req.path);
-//   next();
-// });
+const errorMiddleWare = (req, res, next) => {
+  throw new Error('From my middleware');
+};
 
-// Task site maintainance
-// app.use((req, res, next) => {
-//   const method = req.method;
-//   if (
-//     method === 'GET' ||
-//     method === 'POST' ||
-//     method === 'PATCH' ||
-//     method === 'DELETE'
-//   ) {
-//     res.status(503).send('Site is under maintainance');
-//   } else {
-//     next();
-//   }
-// });
+app.post(
+  '/upload',
+  errorMiddleWare,
+  (req, res) => {
+    res.send();
+  },
+  (error, req, res, next) => {
+    res.status(400).send({ error: error.message });
+  }
+);
 
 app.use(express.json()); //convert array/object data into pure JSON object
 
